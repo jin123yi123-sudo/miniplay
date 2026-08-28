@@ -1,0 +1,1 @@
+export const site={name:"MiniPlay",tagline:"Quick browser games for short breaks.",description:"Free, fast browser games that work instantly on phone, tablet, and desktop.",url:"https://miniplay.example",email:"hello@miniplay.example"};
