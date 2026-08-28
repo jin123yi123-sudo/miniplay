@@ -1,0 +1,1 @@
+import Link from"next/link";export default function NotFound(){return <div className="container" style={{padding:"90px 0",textAlign:"center"}}><h1>Game not found</h1><p className="muted">That page may have moved, but your next break is still covered.</p><Link className="btn" href="/games">Browse games</Link></div>}
