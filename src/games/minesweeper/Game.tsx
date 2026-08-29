@@ -1,0 +1,20 @@
+"use client";
+import { useEffect, useRef, useState } from "react";
+import GameShell from "@/components/GameShell";
+import { gameBySlug } from "@/data/games";
+type Cell={mine:boolean;open:boolean;flag:boolean;near:number};
+const levels={Easy:[9,9,10],Medium:[12,12,22],Hard:[16,16,40]} as const;
+const neighbors=(index:number,rows:number,cols:number)=>{const row=Math.floor(index/cols),col=index%cols,result:number[]=[];for(let dr=-1;dr<=1;dr++)for(let dc=-1;dc<=1;dc++){const r=row+dr,c=col+dc;if((dr||dc)&&r>=0&&r<rows&&c>=0&&c<cols)result.push(r*cols+c)}return result};
+const blank=(rows:number,cols:number):Cell[]=>Array.from({length:rows*cols},()=>({mine:false,open:false,flag:false,near:0}));
+function plant(cells:Cell[],safe:number,rows:number,cols:number,mines:number){const next=cells.map(cell=>({...cell})),blocked=new Set([safe,...neighbors(safe,rows,cols)]);const options=next.map((_,index)=>index).filter(index=>!blocked.has(index)).sort(()=>Math.random()-.5);options.slice(0,mines).forEach(index=>next[index].mine=true);next.forEach((cell,index)=>cell.near=neighbors(index,rows,cols).filter(n=>next[n].mine).length);return next}
+export default function Minesweeper(){
+  const [level,setLevel]=useState<keyof typeof levels>("Easy"),[cells,setCells]=useState(()=>blank(9,9)),[started,setStarted]=useState(false),[status,setStatus]=useState("Ready"),[seconds,setSeconds]=useState(0);
+  const timer=useRef<number|null>(null),press=useRef<number|null>(null);const[rows,cols,mines]=levels[level];
+  const stop=()=>{if(timer.current)window.clearInterval(timer.current);timer.current=null};
+  useEffect(()=>()=>stop(),[]);
+  const reset=(next=level)=>{stop();const[r,c]=levels[next];setCells(blank(r,c));setStarted(false);setStatus("Ready");setSeconds(0)};
+  function reveal(index:number){if(status==="Lost"||status==="Won"||cells[index].flag)return;let next=cells;if(!started){next=plant(cells,index,rows,cols,mines);setStarted(true);timer.current=window.setInterval(()=>setSeconds(value=>value+1),1000)}next=next.map(cell=>({...cell}));if(next[index].mine){next.forEach(cell=>{if(cell.mine)cell.open=true});setStatus("Lost");stop();setCells(next);return}const queue=[index],seen=new Set<number>();while(queue.length){const current=queue.pop()!;if(seen.has(current)||next[current].flag)continue;seen.add(current);next[current].open=true;if(next[current].near===0)neighbors(current,rows,cols).forEach(n=>queue.push(n))}if(next.filter(cell=>cell.open).length===next.length-mines){setStatus("Won");stop()}else setStatus("Playing");setCells(next)}
+  function flag(index:number){if(cells[index].open||status==="Lost"||status==="Won")return;setCells(current=>current.map((cell,i)=>i===index?{...cell,flag:!cell.flag}:cell))}
+  const flags=cells.filter(cell=>cell.flag).length;
+  return <GameShell game={gameBySlug("minesweeper")!} restart={()=>reset()}><div style={{width:"min(94vw,650px)",textAlign:"center"}}><div className="game-controls"><label>Difficulty <select aria-label="Minesweeper difficulty" value={level} onChange={event=>{const next=event.target.value as keyof typeof levels;setLevel(next);reset(next)}}>{Object.keys(levels).map(value=><option key={value}>{value}</option>)}</select></label><span className="stat">Mines {Math.max(0,mines-flags)}</span><span className="stat">Time {seconds}s</span><span className="stat" role="status">{status}</span></div><div className="mine-board" data-testid="mine-board" style={{gridTemplateColumns:`repeat(${cols},minmax(22px,1fr))`}}>{cells.map((cell,index)=><button key={index} aria-label={`Cell ${index+1}, ${cell.open?cell.mine?"mine":cell.near?`${cell.near} adjacent mines`:"clear":cell.flag?"flagged":"covered"}`} className={cell.open?"open":""} onClick={()=>reveal(index)} onContextMenu={event=>{event.preventDefault();flag(index)}} onPointerDown={()=>{press.current=window.setTimeout(()=>{flag(index);press.current=null},500)}} onPointerUp={()=>{if(press.current)window.clearTimeout(press.current);press.current=null}}>{cell.open?cell.mine?"✹":cell.near||"":cell.flag?"⚑":""}</button>)}</div></div></GameShell>
+}

@@ -1,6 +1,6 @@
 # MiniPlay
 
-Static-first browser game MVP built with Next.js App Router, TypeScript, Canvas, CSS, and lightweight browser APIs. It includes Number Merge, Snake, Sudoku, Klondike Solitaire, and Emoji Memory.
+Static-first browser game MVP built with Next.js App Router, TypeScript, Canvas, CSS, and lightweight browser APIs. It includes ten original games across puzzle, arcade, brain, card, and casual categories.
 
 ## Requirements and local setup
 
@@ -37,12 +37,16 @@ Cloudflare DNS or CDN can be connected later without changing game logic. There 
 
 Game metadata lives in `src/data/games.ts`. Each game is dynamically imported through `src/games/GameLoader.tsx`, so opening the home page does not execute every game component. Browser state uses safe helpers and the `miniplay:*` localStorage namespace.
 
-## Add a future game
+## Add a game
 
-1. Add metadata and original editorial content to `src/data/games.ts`.
-2. Create `src/games/<slug>/Game.tsx` using `GameShell`.
-3. Add its dynamic import to `src/games/GameLoader.tsx`.
-4. Add desktop and mobile Playwright coverage.
+1. Create `src/games/<slug>/Game.tsx`, use `GameShell`, and keep gameplay client-only and dependency-light.
+2. Add complete metadata, controls, tips, FAQ, and original editorial content to `src/data/games.ts`.
+3. Register a lazy dynamic import in `src/games/GameLoader.tsx`; do not preload game bundles from listing pages.
+4. Reuse an existing category or add its unique category introduction and metadata in the category page.
+5. Check title, description, canonical URL, Open Graph data, structured data, static params, and sitemap inclusion.
+6. Add interaction, restart, desktop, 375×812 mobile, overflow, and 404 Playwright coverage.
+7. Run lint, TypeScript, build, and the full Playwright suite.
+8. Record any third-party code or assets in `THIRD_PARTY_LICENSES.md`; original code and CSS-only visuals need no new entry.
 
 The entry then appears in search, categories, related games, static params, and the sitemap.
 
