@@ -1,4 +1,4 @@
-# MiniPlay
+# GameVado
 
 Static-first browser game MVP built with Next.js App Router, TypeScript, Canvas, CSS, and lightweight browser APIs. It includes ten original games across puzzle, arcade, brain, card, and casual categories.
 
@@ -15,6 +15,11 @@ pnpm dev
 
 Set `NEXT_PUBLIC_SITE_URL` before a production build. It is the single source for canonical URLs, Open Graph URLs, JSON-LD, sitemap entries, and the robots sitemap reference. `NEXT_PUBLIC_CONTACT_EMAIL` is optional; the contact page hides the address until configured.
 
+```env
+NEXT_PUBLIC_SITE_URL=https://gamevado.com
+NEXT_PUBLIC_CONTACT_EMAIL=
+```
+
 ```bash
 pnpm lint
 pnpm test:e2e
@@ -26,7 +31,7 @@ Playwright runs desktop and 375×812 mobile projects. Install its Chromium build
 ## Deploy to Vercel
 
 1. Import the GitHub repository into Vercel.
-2. Add `NEXT_PUBLIC_SITE_URL=https://your-production-domain.com`.
+2. Add `NEXT_PUBLIC_SITE_URL=https://gamevado.com`.
 3. Optionally add `NEXT_PUBLIC_CONTACT_EMAIL`.
 4. Use `pnpm build` with the detected Next.js output.
 5. Verify `/sitemap.xml`, `/robots.txt`, canonical tags, and one game page after deployment.
@@ -52,4 +57,4 @@ The entry then appears in search, categories, related games, static params, and 
 
 ## Copyright
 
-MiniPlay's original source code and content are proprietary. See `LICENSE`. Third-party dependencies retain their respective licenses as documented in `THIRD_PARTY_LICENSES.md`.
+GameVado's original source code and content are proprietary. See `LICENSE`. Third-party dependencies retain their respective licenses as documented in `THIRD_PARTY_LICENSES.md`.
