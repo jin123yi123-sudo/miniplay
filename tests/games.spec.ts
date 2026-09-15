@@ -1,4 +1,4 @@
-import{expect,test}from"@playwright/test";
+import{expect,test}from"./fixtures";
 test("Number Merge restarts and accepts keyboard",async({page})=>{await page.goto("/games/number-merge");await expect(page.getByText("Score 0")).toBeVisible();await page.keyboard.press("ArrowLeft");await page.getByRole("button",{name:/Restart/}).first().click();await expect(page.getByText("Score 0")).toBeVisible()});
 test("Snake accepts keyboard and controls",async({page})=>{await page.goto("/games/snake");await expect(page.locator("canvas")).toBeVisible();await page.keyboard.press("ArrowDown");await page.getByRole("button",{name:"Pause"}).click();await expect(page.getByRole("button",{name:"Resume"})).toBeVisible()});
 test("Sudoku changes difficulty and accepts input",async({page})=>{await page.goto("/games/sudoku");await page.getByLabel("Sudoku difficulty").selectOption("Medium");await expect(page.getByLabel("Sudoku difficulty")).toHaveValue("Medium");const empty=page.getByRole("gridcell",{name:/empty/}).first();await empty.click();await page.getByRole("button",{name:"1",exact:true}).click();await page.getByRole("button",{name:"New Game"}).click()});

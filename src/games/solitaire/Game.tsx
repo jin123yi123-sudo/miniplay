@@ -1,6 +1,6 @@
 "use client";
 import{useEffect,useMemo,useState}from"react";
-import GameShell from"@/components/GameShell";
+import{useGameAnalytics}from"@/lib/useGameAnalytics";import GameShell from"@/components/GameShell";
 import{gameBySlug}from"@/data/games";
 
 type Card={id:string;suit:string;rank:number;up:boolean};
@@ -26,8 +26,9 @@ export default function Solitaire(){
   const[state,setState]=useState<State>(newGame),[history,setHistory]=useState<State[]>([]),[selection,setSelection]=useState<Selection|null>(null),[time,setTime]=useState(0);
   useEffect(()=>{const timer=window.setInterval(()=>setTime(value=>value+1),1000);return()=>window.clearInterval(timer)},[]);
   const won=useMemo(()=>suits.every(suit=>(state.foundations[suit]?.length||0)===13),[state.foundations]);
-  const commit=(next:State)=>{setHistory(items=>[...items.slice(-29),clone(state)]);setState(next);setSelection(null)};
-  const restart=()=>{setState(newGame());setHistory([]);setSelection(null);setTime(0)};
+  const{start,restart:trackRestart}=useGameAnalytics("solitaire",won?"complete":null);
+  const commit=(next:State)=>{start();setHistory(items=>[...items.slice(-29),clone(state)]);setState(next);setSelection(null)};
+  const restart=()=>{trackRestart();setState(newGame());setHistory([]);setSelection(null);setTime(0)};
   const undo=()=>setHistory(items=>{const previous=items.at(-1);if(!previous)return items;setState(clone(previous));setSelection(null);return items.slice(0,-1)});
   const revealTop=(cols:Card[][],col:number)=>{const top=cols[col].at(-1);if(top&&!top.up)top.up=true};
 
@@ -58,12 +59,12 @@ export default function Solitaire(){
   }
 
   function selectTableau(col:number,index:number){
-    const cards=state.cols[col].slice(index);if(!validSequence(cards))return;
+    const cards=state.cols[col].slice(index);if(!validSequence(cards))return;start();
     if(selection){if(selection.kind==="tableau"&&selection.col===col&&selection.index===index){setSelection(null);return}const moved=selection.kind==="waste"?moveWaste(col):moveTableau(selection.col,selection.index,col);if(!moved)setSelection({kind:"tableau",col,index});return}
     setSelection({kind:"tableau",col,index});
   }
   function tapColumn(col:number){if(!selection)return;if(selection.kind==="waste")moveWaste(col);else moveTableau(selection.col,selection.index,col)}
-  function selectWaste(){if(!state.waste.length)return;setSelection(current=>current?.kind==="waste"?null:{kind:"waste"})}
+  function selectWaste(){if(!state.waste.length)return;start();setSelection(current=>current?.kind==="waste"?null:{kind:"waste"})}
 
   const cardView=(card:Card,selected=false)=><div className={`playing-card ${card.up?"face-up":"face-down"} ${selected?"selected":""}`} style={{color:isRed(card.suit)?"#c72d2d":"#172033"}}>{card.up&&<><span>{rankLabel(card.rank)}</span><span aria-hidden="true">{card.suit}</span></>}</div>;
   return <GameShell game={gameBySlug("solitaire")!} restart={restart}><div className="solitaire" data-testid="solitaire-board"><div className="game-controls"><span className="stat">Time {Math.floor(time/60)}:{String(time%60).padStart(2,"0")}</span><button className="btn secondary" onClick={restart}>New Game</button><button className="btn secondary" onClick={undo} disabled={!history.length}>Undo</button></div><div className="solitaire-top"><div className="card-row"><button className="card-button" onClick={deal} aria-label={state.stock.length?`Deal from stock, ${state.stock.length} cards remaining`:state.waste.length?"Recycle waste into stock":"Empty stock"} data-testid="solitaire-stock">{state.stock.length?cardView({id:"back",suit:"",rank:0,up:false}):<div className="card-slot">↻</div>}</button><button className="card-button" onClick={selectWaste} aria-label={state.waste.length?`Select waste ${rankLabel(state.waste.at(-1)!.rank)} ${state.waste.at(-1)!.suit}`:"Empty waste"} data-testid="solitaire-waste">{state.waste.length?cardView(state.waste.at(-1)!,selection?.kind==="waste"):<div className="card-slot"/>}</button></div><div className="card-row foundations">{suits.map(suit=><button className="card-button" key={suit} onClick={()=>moveToFoundation(suit)} aria-label={`${suit} foundation`}>{state.foundations[suit]?.length?cardView(state.foundations[suit].at(-1)!):<div className="card-slot suit-slot">{suit}</div>}</button>)}</div></div><div className="tableau" role="group" aria-label="Solitaire tableau">{state.cols.map((col,colIndex)=><button className="tableau-column" key={colIndex} aria-label={`Tableau column ${colIndex+1}`} onClick={()=>tapColumn(colIndex)} onDragOver={event=>event.preventDefault()} onDrop={event=>{event.preventDefault();const raw=event.dataTransfer.getData("text/plain").split(":").map(Number);if(raw.length===2)moveTableau(raw[0],raw[1],colIndex)}}>{col.map((card,index)=><span className="tableau-card" key={card.id} style={{top:index*24}} draggable={card.up} onDragStart={event=>{if(!validSequence(col.slice(index))){event.preventDefault();return}event.stopPropagation();event.dataTransfer.setData("text/plain",`${colIndex}:${index}`)}} onClick={event=>{event.stopPropagation();selectTableau(colIndex,index)}}>{cardView(card,selection?.kind==="tableau"&&selection.col===colIndex&&selection.index===index)}</span>)}</button>)}</div><p className="muted solitaire-help">Tap a face-up card or ordered stack, then tap its destination. Tap a foundation after selecting a top card. Desktop drag remains available.</p>{won&&<h2 role="status">You completed the deck!</h2>}</div></GameShell>;

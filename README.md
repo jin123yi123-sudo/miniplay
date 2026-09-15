@@ -18,10 +18,12 @@ Set `NEXT_PUBLIC_SITE_URL` before a production build. It is the single source fo
 ```env
 NEXT_PUBLIC_SITE_URL=https://gamevado.com
 NEXT_PUBLIC_CONTACT_EMAIL=
+NEXT_PUBLIC_GA_ID=
 ```
 
 ```bash
 pnpm lint
+pnpm exec tsc --noEmit
 pnpm test:e2e
 pnpm build
 ```
@@ -32,11 +34,11 @@ Playwright runs desktop and 375×812 mobile projects. Install its Chromium build
 
 1. Import the GitHub repository into Vercel.
 2. Add `NEXT_PUBLIC_SITE_URL=https://gamevado.com`.
-3. Optionally add `NEXT_PUBLIC_CONTACT_EMAIL`.
+3. Optionally add `NEXT_PUBLIC_CONTACT_EMAIL` and `NEXT_PUBLIC_GA_ID=G-5QSPKVSHTN`. GA4 is completely disabled when the latter is empty.
 4. Use `pnpm build` with the detected Next.js output.
 5. Verify `/sitemap.xml`, `/robots.txt`, canonical tags, and one game page after deployment.
 
-Cloudflare DNS or CDN can be connected later without changing game logic. There is no persistent server, database, login, tracking SDK, analytics integration, or real advertising ID.
+Cloudflare DNS or CDN can be connected later without changing game logic. There is no persistent server, database, login, or real advertising ID. Optional Google Analytics uses the lightweight built-in Next.js Script loader after hydration; no analytics package is installed.
 
 ## Architecture and browser data
 
@@ -58,3 +60,9 @@ The entry then appears in search, categories, related games, static params, and 
 ## Copyright
 
 GameVado's original source code and content are proprietary. See `LICENSE`. Third-party dependencies retain their respective licenses as documented in `THIRD_PARTY_LICENSES.md`.
+
+## Analytics
+
+Set `NEXT_PUBLIC_GA_ID` in Vercel before building. It is a public Measurement ID, not a secret. Enhanced Measurement owns initial and history-based page views; enable “Page changes based on browser history events” in the GA4 web stream. Do not add a manual page_view sender. Game events are `game_start` (first meaningful user input), `game_restart` (explicit restart/new-game click), and `game_complete` (one clear outcome per interacted round). Restoring a completed saved game does not emit a completion.
+
+Before serving regions requiring analytics consent, review a real consent solution and Consent Mode/CMP configuration; this repository does not implement a cookie banner. After deployment, verify collection separately in GA4 Realtime/DebugView. Automated tests intercept Google requests and do not verify production receipt.
