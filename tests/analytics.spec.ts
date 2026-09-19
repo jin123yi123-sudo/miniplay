@@ -38,7 +38,7 @@ const actions:Array<{slug:string;name:string;act:(page:Page)=>Promise<unknown>}>
   {slug:"solitaire",name:"Solitaire",act:page=>page.getByTestId("solitaire-stock").click()},
   {slug:"emoji-memory",name:"Emoji Memory",act:page=>page.getByRole("button",{name:"Hidden card"}).first().click()},
   {slug:"minesweeper",name:"Minesweeper",act:page=>page.getByTestId("mine-board").getByRole("button").first().click()},
-  {slug:"tic-tac-toe",name:"Tic Tac Toe",act:page=>page.getByRole("gridcell",{name:/empty/}).first().click()},
+  {slug:"tic-tac-toe",name:"Tic Tac Toe",act:async page=>{const cell=page.getByRole("gridcell",{name:/empty/}).first();await expect(cell).toBeEnabled();await cell.click()}},
   {slug:"pong",name:"Pong",act:page=>page.keyboard.press("ArrowDown")},
   {slug:"breakout",name:"Breakout",act:page=>page.keyboard.press("ArrowRight")},
   {slug:"connect-four",name:"Connect Four",act:page=>page.getByRole("button",{name:/column 1$/}).click()},

@@ -1,1 +1,1 @@
-export default function AdPlaceholder({slot}:{slot:string}){return <div className="ad" aria-label={`Advertisement placeholder ${slot}`}>ADVERTISEMENT</div>}
+"use client";import{useI18n}from'@/i18n/LocaleContext';export default function AdPlaceholder({slot}:{slot:string}){const{locale,t}=useI18n();return <div className="ad" aria-label={locale==='zh-CN'?`广告占位 ${slot}`:`Advertisement placeholder ${slot}`}>{t.common.advertisement}</div>}

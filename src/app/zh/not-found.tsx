@@ -1,0 +1,1 @@
+import Link from'next/link';export default function NotFound(){return <div className="container" style={{padding:'90px 0',textAlign:'center'}}><h1>页面不存在</h1><p className="muted">这个页面可能已经移动，不过下一场小游戏还在等你。</p><Link className="btn" href="/zh/games">返回游戏</Link></div>}

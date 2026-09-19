@@ -8,3 +8,4 @@ work/
 outputs/
 test-results/
 playwright-report/
+*.tsbuildinfo

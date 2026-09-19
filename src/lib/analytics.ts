@@ -1,6 +1,6 @@
-export type GameEvent = "game_start" | "game_restart" | "game_complete";
+export type GameEvent = "game_start" | "game_restart" | "game_over" | "game_complete" | "level_start" | "level_complete" | "level_fail" | "multiplayer_match_start" | "multiplayer_round_end" | "multiplayer_match_end";
 export type GameResult = "win" | "complete" | "loss" | "draw";
-export type GameEventParams = {game_name:string;game_slug:string;result?:GameResult};
+export type GameEventParams = {game_name:string;game_slug:string;locale?:"en"|"zh-CN";result?:GameResult;level?:number;score?:number;stars?:number;moves?:number;moves_remaining?:number;duration?:number;winner?:string};
 
 declare global {
   interface Window {
